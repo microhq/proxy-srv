@@ -11,7 +11,7 @@ Run discovery
 
 ```
 consul agent -dev
-``
+```
 
 Run the proxy with the name com.example.srv.hello and proxy address set to the apps address localhost:8089
 
