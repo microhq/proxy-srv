@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package proxy;
+
+service Proxy {
+	rpc Call(Request) returns (Response) {};
+}
+
+message Pair {
+	string key = 1;
+	repeated string values = 2;
+}
+
+// Request represents a deconstructed http request sent to
+message Request {
+        string method = 1;
+        string path = 2;
+        map<string, Pair> header = 3;
+        map<string, Pair> get = 4;
+        map<string, Pair> post = 5;
+        string body = 6;
+}
+
+// Response
+message Response {
+        int32 statusCode = 1;
+        map<string, Pair> header = 2;
+        string body = 3;
+}
