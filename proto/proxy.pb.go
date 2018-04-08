@@ -19,9 +19,8 @@ import fmt "fmt"
 import math "math"
 
 import (
-	client "github.com/micro/go-micro/client"
-	server "github.com/micro/go-micro/server"
 	context "golang.org/x/net/context"
+	grpc "google.golang.org/grpc"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -157,37 +156,29 @@ func init() {
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ client.Option
-var _ server.Option
+var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion4
 
 // Client API for Proxy service
 
 type ProxyClient interface {
-	Call(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
+	Call(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
 }
 
 type proxyClient struct {
-	c           client.Client
-	serviceName string
+	cc *grpc.ClientConn
 }
 
-func NewProxyClient(serviceName string, c client.Client) ProxyClient {
-	if c == nil {
-		c = client.NewClient()
-	}
-	if len(serviceName) == 0 {
-		serviceName = "proxy"
-	}
-	return &proxyClient{
-		c:           c,
-		serviceName: serviceName,
-	}
+func NewProxyClient(cc *grpc.ClientConn) ProxyClient {
+	return &proxyClient{cc}
 }
 
-func (c *proxyClient) Call(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
-	req := c.c.NewRequest(c.serviceName, "Proxy.Call", in)
+func (c *proxyClient) Call(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.c.Call(ctx, req, out, opts...)
+	err := grpc.Invoke(ctx, "/proxy.Proxy/Call", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -196,20 +187,43 @@ func (c *proxyClient) Call(ctx context.Context, in *Request, opts ...client.Call
 
 // Server API for Proxy service
 
-type ProxyHandler interface {
-	Call(context.Context, *Request, *Response) error
+type ProxyServer interface {
+	Call(context.Context, *Request) (*Response, error)
 }
 
-func RegisterProxyHandler(s server.Server, hdlr ProxyHandler, opts ...server.HandlerOption) {
-	s.Handle(s.NewHandler(&Proxy{hdlr}, opts...))
+func RegisterProxyServer(s *grpc.Server, srv ProxyServer) {
+	s.RegisterService(&_Proxy_serviceDesc, srv)
 }
 
-type Proxy struct {
-	ProxyHandler
+func _Proxy_Call_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProxyServer).Call(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proxy.Proxy/Call",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProxyServer).Call(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
-func (h *Proxy) Call(ctx context.Context, in *Request, out *Response) error {
-	return h.ProxyHandler.Call(ctx, in, out)
+var _Proxy_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "proxy.Proxy",
+	HandlerType: (*ProxyServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Call",
+			Handler:    _Proxy_Call_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "github.com/micro/proxy-srv/proto/proxy.proto",
 }
 
 func init() { proto.RegisterFile("github.com/micro/proxy-srv/proto/proxy.proto", fileDescriptor0) }
