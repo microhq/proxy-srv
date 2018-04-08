@@ -13,7 +13,7 @@ func main() {
 	cli.Init()
 
 	// create the proxy client
-	c := proto.NewProxyClient("com.example.srv.hello", cli.Client())
+	c := proto.ProxyServiceClient("com.example.srv.hello", cli.Client())
 
 	// make the request
 	rsp, err := c.Call(context.TODO(), &proto.Request{
