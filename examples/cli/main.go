@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/micro/go-micro"
-	proto "github.com/micro/proxy-srv/proto"
+	proto "github.com/microhq/proxy-srv/proto"
 	"golang.org/x/net/context"
 )
 
@@ -13,7 +13,7 @@ func main() {
 	cli.Init()
 
 	// create the proxy client
-	c := proto.ProxyServiceClient("com.example.srv.hello", cli.Client())
+	c := proto.NewProxyService("com.example.srv.hello", cli.Client())
 
 	// make the request
 	rsp, err := c.Call(context.TODO(), &proto.Request{

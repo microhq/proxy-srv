@@ -6,8 +6,8 @@ import (
 	"github.com/micro/cli"
 	"github.com/micro/go-log"
 	"github.com/micro/go-micro"
-	"github.com/micro/proxy-srv/handler"
-	proto "github.com/micro/proxy-srv/proto"
+	"github.com/microhq/proxy-srv/handler"
+	proto "github.com/microhq/proxy-srv/proto"
 )
 
 func main() {

@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/micro/go-micro/errors"
-	proto "github.com/micro/proxy-srv/proto"
+	proto "github.com/microhq/proxy-srv/proto"
 	"golang.org/x/net/context"
 )
 
